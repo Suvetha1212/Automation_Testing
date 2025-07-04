@@ -1,0 +1,60 @@
+package com.example;
+import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.*;
+import org.testng.annotations.*;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+import io.qameta.allure.*;
+
+@Epic("Practice Test Automation")
+@Feature("Login Functionality")
+public class AppTest {
+
+    WebDriver driver;
+
+    class LoginPage {
+        WebDriver driver;
+        By username = By.id("username");
+        By password = By.id("password");
+        By loginBtn = By.id("submit");
+
+        public LoginPage(WebDriver driver) {
+            this.driver = driver;
+        }
+
+        public void login(String user, String pass) {
+            driver.findElement(username).sendKeys(user);
+            driver.findElement(password).sendKeys(pass);
+            driver.findElement(loginBtn).click();
+        }
+    }
+
+    @BeforeTest
+    public void setup() {
+        WebDriverManager.chromedriver().setup();
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--remote-allow-origins=*");
+        driver = new ChromeDriver(options);
+        driver.manage().window().maximize();
+        driver.get("https://practicetestautomation.com/practice-test-login/");
+    }
+
+    @Test(description = "Valid Login Test")
+    @Severity(SeverityLevel.CRITICAL)
+    @Story("Login with valid credentials")
+    @Description("Login using correct username and password and verify successful login.")
+    public void testLogin() {
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.login("student", "Password123");
+
+        String successText = driver.findElement(By.tagName("h1")).getText();
+        assert successText.contains("Logged In Successfully");
+    }
+
+    @AfterTest
+    public void teardown() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+}
